@@ -1,0 +1,10 @@
+# DocExtract
+*.pyc
+__pycache__/
+*.egg-info/
+.git/
+.env
+data/
+models/
+*.md
+!requirements.txt
