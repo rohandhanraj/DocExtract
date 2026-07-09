@@ -117,9 +117,11 @@ venv.bak/
 .env.*.local
 
 # DocExtract Specific folders and cache files
-data/
+/data/
 models/
 .python-version
 
+# /graphify-out/
+
 # Large notebook (exclude if not required, but let's exclude florence2.ipynb to keep repo lightweight unless needed)
-florence2.ipynb
+# florence2.ipynb

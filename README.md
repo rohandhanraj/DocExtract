@@ -30,6 +30,78 @@ graph LR
     J --> K["Split-Pane Viewer"]
 ```
 
+```mermaid
+graph TD
+    %% Node Definitions
+    Start((Start))
+    End((End))
+    
+    subgraph Ingestion [1. Ingestion Phase]
+        direction TB
+        Download[Fetch encrypted files from S3/Filesystem]
+        Decrypt[Decrypt files using user key]
+        Parse[Parse + OCR]
+    end
+
+    subgraph Analysis [2. Analysis Phase]
+        direction TB
+        Classify[Classify]
+        Decision{Decision: Proceed with Extraction?}
+    end
+
+    subgraph Extraction [3. Extraction Phase]
+        direction TB
+        Detect[Detect Pages]
+        Batch[Batch Extract Node]
+        Format[Format Node]
+    end
+
+    subgraph Output [4. Output & Storage]
+        direction LR
+        SQL[(Postgres SQL Database)]
+        SSE[SSE Stream]
+    end
+
+    %% Main Flow Connections
+    Start --> Download 
+    Download --> Decrypt 
+    Decrypt --> Parse 
+    Parse --> Classify 
+
+    %% The Decision Branching
+    Classify --> Decision
+    Classify -->|Store Classification Label| SQL
+
+    Decision -- "No" --> End
+    Decision -- "Yes" --> Detect
+
+    %% Extraction Flow
+    Detect --> Batch
+    Batch --> Format
+
+    %% Final Convergence
+    Format --> SQL
+    Format --> SSE
+
+    %% Terminal Connections
+    SQL --> End
+    SSE --> End
+
+    %% Styling
+    style Start fill:#f8f9fa,stroke:#333,stroke-width:2px
+    style End fill:#f8f9fa,stroke:#333,stroke-width:2px
+    
+    style Ingestion fill:#e3f2fd,stroke:#2196f3,stroke-dasharray: 5 5
+    style Analysis fill:#fff8e1,stroke:#ffc107,stroke-dasharray: 5 5
+    style Extraction fill:#f3e5f5,stroke:#9c27b0,stroke-dasharray: 5 5
+    style Output fill:#e8f5e9,stroke:#4caf50,stroke-dasharray: 5 5
+
+    style Decision fill:#fff4dd,stroke:#d4a017,stroke-width:2px
+    style SQL fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style SSE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+
+```
+
 ### LangGraph Pipeline Stages
 - **Ingest Node**: Decodes uploads, converts PDF/DOCX pages to high-res images.
 - **Classify Node**: Queries VLM to identify document classification.
